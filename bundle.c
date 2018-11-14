@@ -458,10 +458,11 @@ int create_bundle(struct repository *r, struct bundle_header *header,
 	object_array_remove_duplicates(&revs.pending);
 
 	ref_count = write_bundle_refs(bundle_fd, &revs);
-	if (!ref_count)
-		die(_("Refusing to create empty bundle."));
-	else if (ref_count < 0)
+	if (ref_count <= 0)  {
+		if (!ref_count)
+			error(_("Refusing to create empty bundle."));
 		goto err;
+	}
 
 	/* write pack */
 	if (write_pack_data(bundle_fd, &revs)) {
